@@ -9,11 +9,19 @@ public class Player : MonoBehaviour
     [SerializeField] private float _gravity = 1.0f;
     [SerializeField] private float _jumpHeight = 15.0f;
     private float _yVelocity;
+    [SerializeField] private bool _doubleJump;
+    private int _coins;
+    private UIManager _uiManager;
 
     // Start is called before the first frame update
     void Start()
     {
         _controller = GetComponent<CharacterController>();
+        _uiManager = GameObject.Find("Canvas").GetComponent<UIManager>();
+        if (_uiManager == null)
+        {
+            Debug.LogError("UI Manager Null");
+        }
     }
 
     // Update is called once per frame
@@ -27,15 +35,20 @@ public class Player : MonoBehaviour
         //else apply gravity
         if (_controller.isGrounded == true)
         {
-            //if i hit the space key
-            //jump
             if (Input.GetKeyDown(KeyCode.Space))
-            {
+            {        
                 _yVelocity = _jumpHeight;
+                _doubleJump = true;
             }
         }
+       
         else
         {
+            if (Input.GetKeyDown(KeyCode.Space) && _doubleJump == true)
+            {
+                _yVelocity += _jumpHeight * 1.25f;
+                _doubleJump = false;
+            }
             _yVelocity -= _gravity;
         }
         velocity.y = _yVelocity;
@@ -43,5 +56,11 @@ public class Player : MonoBehaviour
         //velocity = direction with speed
         _controller.Move(velocity * Time.deltaTime);
 
+    }
+    public void AddCoins()
+    {
+        _coins++;
+
+        _uiManager.UpdateCoinDisplay(_coins);
     }
 }
